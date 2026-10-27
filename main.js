@@ -1605,6 +1605,64 @@
       sunOrbitActive = e.target.checked;
     });
 
+    // Botões de Iluminação Claro / Escuro
+    const btnClaro = document.getElementById('btn-mode-claro');
+    const btnEscuro = document.getElementById('btn-mode-escuro');
+    const dockBtnClaro = document.getElementById('dock-btn-claro');
+    const dockBtnEscuro = document.getElementById('dock-btn-escuro');
+
+    if (btnClaro) {
+      btnClaro.addEventListener('click', () => setSolarThemeMode('claro'));
+    }
+    if (btnEscuro) {
+      btnEscuro.addEventListener('click', () => setSolarThemeMode('escuro'));
+    }
+    if (dockBtnClaro) {
+      dockBtnClaro.addEventListener('click', () => setSolarThemeMode('claro'));
+    }
+    if (dockBtnEscuro) {
+      dockBtnEscuro.addEventListener('click', () => setSolarThemeMode('escuro'));
+    }
+
+    // Modal de Fontes Cartográficas & Meteorológicas
+    const modalSources = document.getElementById('modal-sources');
+    const btnSourcesPill = document.getElementById('api-status-badge');
+    const btnCloseSources = document.getElementById('btn-close-sources');
+    const btnModalOk = document.getElementById('btn-modal-ok');
+
+    function openSourcesModal() {
+      if (modalSources) {
+        modalSources.classList.add('open');
+        modalSources.setAttribute('aria-hidden', 'false');
+        playSynthTone(540, 'sine', 0.08);
+      }
+    }
+
+    function closeSourcesModal() {
+      if (modalSources) {
+        modalSources.classList.remove('open');
+        modalSources.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    if (btnSourcesPill) {
+      btnSourcesPill.addEventListener('click', openSourcesModal);
+    }
+    if (btnCloseSources) {
+      btnCloseSources.addEventListener('click', closeSourcesModal);
+    }
+    if (btnModalOk) {
+      btnModalOk.addEventListener('click', closeSourcesModal);
+    }
+    if (modalSources) {
+      modalSources.addEventListener('click', (e) => {
+        if (e.target === modalSources) closeSourcesModal();
+      });
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSourcesModal();
+    });
+
     // View Buttons with pulled-back camera positions
     btnViewPerspective.addEventListener('click', () => {
       setActiveViewBtn(btnViewPerspective);
@@ -1837,6 +1895,10 @@
       updateWindFlow(delta);
     }
 
+    if (lightTween) {
+      lightTween.update(performance.now());
+    }
+
     renderer.render(scene, camera);
   }
 
@@ -1853,6 +1915,8 @@
     setRenderMode('relief');
 
     initWindFlowLayer();
+
+    setSolarThemeMode('escuro', false);
 
     animate();
   }
