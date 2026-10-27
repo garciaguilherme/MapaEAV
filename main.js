@@ -379,6 +379,8 @@
       ambientLight.color.set(THEMES[currentThemeKey].ambientColor || 0x4a3e32);
       ambientLight.intensity = THEMES[currentThemeKey].ambientIntensity || 0.95;
     }
+  }
+
   let lightTween = null;
   let currentSolarMode = 'escuro';
 
@@ -649,7 +651,7 @@
       // 6. Build Notable Peaks 3D markers
       buildNotablePeaks();
 
-      apiStatusText.textContent = 'NASA SRTM • IBGE';
+      apiStatusText.textContent = 'Fontes';
       apiStatusDot.style.backgroundColor = '#d4af37';
     } catch (err) {
       console.error('Erro ao carregar relevo:', err);
