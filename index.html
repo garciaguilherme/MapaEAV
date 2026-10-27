@@ -38,9 +38,33 @@
     </div>
 
     <div class="top-metrics">
-      <div class="api-status-badge" id="api-status-badge" title="Status da malha geográfica e DEM">
+      <button class="api-status-badge" id="api-status-badge" title="Ver Fontes de Dados (NASA, IBGE, CPTEC)" aria-label="Abrir modal de fontes">
         <span class="status-dot" id="api-status-dot"></span>
-        <span id="api-status-text">Relevo 3D Ativo</span>
+        <span id="api-status-text">Fontes</span>
+      </button>
+
+      <!-- Toggle Claro / Escuro -->
+      <div class="theme-toggle-segmented" id="theme-toggle-segmented" title="Alternar Iluminação: Claro / Escuro" role="group" aria-label="Modo Claro ou Escuro">
+        <button class="btn-theme-toggle" id="btn-mode-claro" data-mode="claro" title="Modo Claro (Intensidade 0.8 • Altura 65° • Ângulo 106°)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <span>Claro</span>
+        </button>
+        <button class="btn-theme-toggle active" id="btn-mode-escuro" data-mode="escuro" title="Modo Escuro (Intensidade 0.8 • Altura 5° • Ângulo 106°)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span>Escuro</span>
+        </button>
       </div>
 
       <button class="btn-icon-nav active" id="btn-nav-wind" title="Ligar / Desligar Fluxo de Vento (CPTEC / INPE)" aria-label="Ligar ou desligar camada de vento">
@@ -118,31 +142,42 @@
         <span>Iluminação Lateral Realista</span>
       </div>
 
+      <div class="btn-grid-2" style="margin-bottom: 14px;">
+        <button class="btn-pill" id="dock-btn-claro" title="Modo Claro (Intensidade 0.8 • Altura 65° • Ângulo 106°)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="3" x2="12" y2="1"/><line x1="12" y1="23" x2="12" y2="21"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Modo Claro</span>
+        </button>
+        <button class="btn-pill active" id="dock-btn-escuro" title="Modo Escuro (Intensidade 0.8 • Altura 5° • Ângulo 106°)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span>Modo Escuro</span>
+        </button>
+      </div>
+
       <!-- Sun Azimuth (Direction) -->
       <div class="slider-group">
         <div class="slider-label">
           <span>Ângulo da Luz (Azimute)</span>
-          <span id="azimuth-val">312° (NO)</span>
+          <span id="azimuth-val">106° (L (Leste))</span>
         </div>
-        <input type="range" id="slider-azimuth" min="0" max="360" step="2" value="312">
+        <input type="range" id="slider-azimuth" min="0" max="360" step="2" value="106">
       </div>
 
       <!-- Sun Elevation (Grazing angle) -->
       <div class="slider-group">
         <div class="slider-label">
           <span>Altura do Sol (Elevação)</span>
-          <span id="elevation-val">25° (Rasante)</span>
+          <span id="elevation-val">5° (Rasante)</span>
         </div>
-        <input type="range" id="slider-elevation" min="5" max="65" step="1" value="25">
+        <input type="range" id="slider-elevation" min="5" max="65" step="1" value="5">
       </div>
 
       <!-- Sun Intensity -->
       <div class="slider-group">
         <div class="slider-label">
           <span>Intensidade da Luz Solar</span>
-          <span id="light-val">2.4</span>
+          <span id="light-val">0.8</span>
         </div>
-        <input type="range" id="slider-light" min="0.8" max="3.5" step="0.1" value="2.4">
+        <input type="range" id="slider-light" min="0.8" max="3.5" step="0.1" value="0.8">
       </div>
 
       <div class="toggle-row">
@@ -408,6 +443,56 @@
     <div class="hint-item">
       <kbd>Luz Lateral</kbd>
       <span>Ajuste Azimute & Elevação</span>
+    </div>
+  </div>
+
+  <!-- Modal de Fontes -->
+  <div class="modal-overlay" id="modal-sources" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <h2>Fontes de Dados & Metadados</h2>
+        </div>
+        <button class="btn-modal-close" id="btn-close-sources" title="Fechar (Esc)" aria-label="Fechar modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-intro">Este projeto cartográfico tridimensional integra bases de dados públicas e científicas abertas:</p>
+
+        <div class="source-card">
+          <div class="source-badge">Topografia & Altimetria</div>
+          <div class="source-info">
+            <h3>NASA SRTM (Shuttle Radar Topography Mission)</h3>
+            <p>Modelo Digital de Elevação (DEM) por radar interferométrico com resolução espacial de 1 segundo de arco (~30 metros). Proporciona o modelo tridimensional de relevo real exagerado do território brasileiro.</p>
+            <a href="https://www.earthdata.nasa.gov/sensors/srtm" target="_blank" rel="noopener noreferrer">earthdata.nasa.gov ↗</a>
+          </div>
+        </div>
+
+        <div class="source-card">
+          <div class="source-badge">Geografia & Divisas</div>
+          <div class="source-info">
+            <h3>IBGE — Instituto Brasileiro de Geografia e Estatística</h3>
+            <p>Malha territorial oficial das 27 Unidades Federativas do Brasil e dados demográficos e geográficos consumidos via API de Serviços de Dados v3 (SIRGAS 2000). Inclui também as altitudes e coordenadas oficiais do Projeto Pontos Culminantes do Brasil.</p>
+            <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener noreferrer">servicodados.ibge.gov.br ↗</a>
+          </div>
+        </div>
+
+        <div class="source-card">
+          <div class="source-badge">Meteorologia & Ventos</div>
+          <div class="source-info">
+            <h3>CPTEC / INPE — Centro de Previsão de Tempo e Estudos Climáticos</h3>
+            <p>Grade atmosférica de circulação de vento em superfície (componentes vetoriais <em>u</em> e <em>v</em> a 10m de altitude), modelando os fluxos dos ventos alísios, a circulação da bacia amazônica e frentes no Atlântico Sul.</p>
+            <a href="https://www.cptec.inpe.br/" target="_blank" rel="noopener noreferrer">cptec.inpe.br ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-primary-action" id="btn-modal-ok">Entendido</button>
+      </div>
     </div>
   </div>
 

@@ -23,9 +23,9 @@
     sheetWidth: 74.5,
     sheetHeight: 62.5,
     defaultReliefExaggeration: 3.2,
-    defaultAzimuth: 312, // Northwest grazing sunlight (authentic Scott Reinhard / Branner 1919 lighting)
-    defaultElevation: 25, // 25 degrees grazing angle
-    defaultSunIntensity: 2.4
+    defaultAzimuth: 106, // Ângulo de luz: 106° (Leste)
+    defaultElevation: 5,  // Modo escuro inicial: Altura do sol 5° (Rasante)
+    defaultSunIntensity: 0.8 // Intensidade solar: 0.8
   };
 
   const NOTABLE_PEAKS = [
@@ -379,6 +379,76 @@
       ambientLight.color.set(THEMES[currentThemeKey].ambientColor || 0x4a3e32);
       ambientLight.intensity = THEMES[currentThemeKey].ambientIntensity || 0.95;
     }
+  let lightTween = null;
+  let currentSolarMode = 'escuro';
+
+  function syncLightSliders() {
+    if (sliderElevation) {
+      sliderElevation.value = Math.round(sunElevation);
+      elevationVal.textContent = `${Math.round(sunElevation)}° (${sunElevation < 28 ? 'Rasante' : 'Alto'})`;
+    }
+    if (sliderAzimuth) {
+      sliderAzimuth.value = Math.round(sunAzimuth);
+      azimuthVal.textContent = `${Math.round(sunAzimuth)}° (L (Leste))`;
+    }
+    if (sliderLight) {
+      sliderLight.value = sunIntensity.toFixed(1);
+      lightVal.textContent = sunIntensity.toFixed(1);
+    }
+  }
+
+  function setSolarThemeMode(mode, animate = true) {
+    currentSolarMode = mode;
+    const targetIntensity = 0.8;
+    const targetAzimuth = 106;
+    // Modo claro: Altura 65. Modo escuro: Altura 5.
+    const targetElevation = (mode === 'claro' ? 65 : 5);
+
+    // Atualizar botões na top-nav e na dock
+    const btnClaro = document.getElementById('btn-mode-claro');
+    const btnEscuro = document.getElementById('btn-mode-escuro');
+    const dockBtnClaro = document.getElementById('dock-btn-claro');
+    const dockBtnEscuro = document.getElementById('dock-btn-escuro');
+
+    if (btnClaro) btnClaro.classList.toggle('active', mode === 'claro');
+    if (btnEscuro) btnEscuro.classList.toggle('active', mode === 'escuro');
+    if (dockBtnClaro) dockBtnClaro.classList.toggle('active', mode === 'claro');
+    if (dockBtnEscuro) dockBtnEscuro.classList.toggle('active', mode === 'escuro');
+
+    if (!animate) {
+      sunIntensity = targetIntensity;
+      sunAzimuth = targetAzimuth;
+      sunElevation = targetElevation;
+      syncLightSliders();
+      updateLateralLightPosition();
+      return;
+    }
+
+    const startIntensity = sunIntensity;
+    const startAzimuth = sunAzimuth;
+    const startElevation = sunElevation;
+    const startTime = performance.now();
+    const duration = 520; // 520ms de transição cinematográfica da luz
+
+    lightTween = {
+      update: (now) => {
+        const progress = Math.min((now - startTime) / duration, 1.0);
+        const ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+        sunIntensity = startIntensity + (targetIntensity - startIntensity) * ease;
+        sunAzimuth = startAzimuth + (targetAzimuth - startAzimuth) * ease;
+        sunElevation = startElevation + (targetElevation - startElevation) * ease;
+
+        syncLightSliders();
+        updateLateralLightPosition();
+
+        if (progress >= 1.0) {
+          lightTween = null;
+        }
+      }
+    };
+
+    playSynthTone(mode === 'claro' ? 620 : 420, 'sine', 0.08);
   }
 
   // --- Environment & Base Sheet ---
