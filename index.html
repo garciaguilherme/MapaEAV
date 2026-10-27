@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa do Brasil 3D • Relevo Topográfico & Malha IBGE</title>
+  <meta name="description" content="Visualização 3D com relevo topográfico realista exagerado, iluminação lateral cinematográfica e malha oficial do IBGE.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇧🇷</text></svg>">
+</head>
+<body>
+
+  <!-- 3D WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Radial Vignette -->
+  <div class="vignette-overlay"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <div class="brand">
+      <button class="btn-hamburger" id="btn-hamburger" title="Alternar Opções do Menu" aria-label="Abrir Menu de Opções" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <div class="brand-badge" title="Mapa 3D Brasil">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>Brasil 3D • Relevo Topográfico</h1>
+        <div class="tagline">
+          <span>Relevo Exagerado Real • Malha IBGE</span>
+          <span>•</span>
+          <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noopener noreferrer" class="ibge-link">
+            API v3 docs ↗
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-metrics">
+      <div class="api-status-badge" id="api-status-badge" title="Status da malha geográfica e DEM">
+        <span class="status-dot" id="api-status-dot"></span>
+        <span id="api-status-text">Relevo 3D Ativo</span>
+      </div>
+
+      <button class="btn-icon-nav active" id="btn-nav-wind" title="Ligar / Desligar Fluxo de Vento (CPTEC / INPE)" aria-label="Ligar ou desligar camada de vento">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+          <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+          <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+        </svg>
+      </button>
+
+      <button class="btn-icon-nav" id="btn-sound" title="Alternar Efeitos Sonoros">
+        <svg id="icon-sound-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <svg id="icon-sound-on" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+
+      <button class="btn-icon-nav" id="btn-fullscreen" title="Tela Cheia">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Left Control Dock (Escondido no menu hambúrguer) -->
+  <aside class="control-dock" id="control-dock">
+    <div class="dock-top-bar">
+      <div class="dock-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        <span>Opções & Controles</span>
+      </div>
+      <button class="btn-close-dock" id="btn-close-dock" title="Fechar Menu (Esc)" aria-label="Fechar Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Camera Views -->
+    <div class="dock-section">
+      <div class="dock-header">
+        <span>Vistas da Câmera</span>
+      </div>
+      <div class="btn-grid-3">
+        <button class="btn-pill active" id="view-perspective" title="Vista isométrica em 3D">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span>3D Isométrico</span>
+        </button>
+        <button class="btn-pill" id="view-topdown" title="Vista plana superior ortogonal (Norte para cima)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+          <span>2D Plana</span>
+        </button>
+        <button class="btn-pill" id="view-cinematic" title="Vista rasante cinematográfica do relevo">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6z"/></svg>
+          <span>Rasante</span>
+        </button>
+      </div>
+    </div>
+
+
+    <!-- Topographic Relief Exaggeration Slider -->
+    <div class="dock-section" id="section-relief-controls">
+      <div class="dock-header">
+        <span>Relevo Topográfico Real</span>
+      </div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Exagero de Altitude</span>
+          <span id="relief-val">3.2x</span>
+        </div>
+        <input type="range" id="slider-relief" min="0.2" max="6.0" step="0.1" value="3.2">
+      </div>
+    </div>
+
+    <!-- Lateral Lighting Controls -->
+    <div class="dock-section">
+      <div class="dock-header">
+        <span>Iluminação Lateral Realista</span>
+      </div>
+
+      <!-- Sun Azimuth (Direction) -->
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Ângulo da Luz (Azimute)</span>
+          <span id="azimuth-val">312° (NO)</span>
+        </div>
+        <input type="range" id="slider-azimuth" min="0" max="360" step="2" value="312">
+      </div>
+
+      <!-- Sun Elevation (Grazing angle) -->
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Altura do Sol (Elevação)</span>
+          <span id="elevation-val">25° (Rasante)</span>
+        </div>
+        <input type="range" id="slider-elevation" min="5" max="65" step="1" value="25">
+      </div>
+
+      <!-- Sun Intensity -->
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Intensidade da Luz Solar</span>
+          <span id="light-val">2.4</span>
+        </div>
+        <input type="range" id="slider-light" min="0.8" max="3.5" step="0.1" value="2.4">
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          Órbita Solar Contínua
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-sunorbit">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Region Filters -->
+    <div class="dock-section">
+      <div class="dock-header">
+        <span>Filtrar por Região</span>
+      </div>
+      <div class="region-chips">
+        <button class="chip active" data-region="todas">Todas</button>
+        <button class="chip" data-region="Norte">Norte</button>
+        <button class="chip" data-region="Nordeste">Nordeste</button>
+        <button class="chip" data-region="Centro-Oeste">Centro-Oeste</button>
+        <button class="chip" data-region="Sudeste">Sudeste</button>
+        <button class="chip" data-region="Sul">Sul</button>
+      </div>
+    </div>
+
+    <!-- Wind Flow Layer (CPTEC / INPE) -->
+    <div class="dock-section">
+      <div class="dock-header">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+        <span>Ventos CPTEC / INPE</span>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          Fluxo de Vento Dinâmico
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-wind" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="slider-group" id="wind-speed-group">
+        <div class="slider-label">
+          <span>Velocidade das Linhas</span>
+          <span id="wind-speed-val">1.0x</span>
+        </div>
+        <input type="range" id="slider-wind-speed" min="0.3" max="2.5" step="0.1" value="1.0">
+      </div>
+
+      <div class="slider-group" id="wind-density-group">
+        <div class="slider-label">
+          <span>Densidade de Partículas</span>
+          <span id="wind-density-val">2.200</span>
+        </div>
+        <input type="range" id="slider-wind-density" min="600" max="4000" step="200" value="2200">
+      </div>
+
+      <div class="wind-scale-card">
+        <div class="wind-scale-title">Escala de Velocidade do Vento</div>
+        <div class="wind-gradient-bar"></div>
+        <div class="wind-scale-labels">
+          <span>&lt; 15 km/h (Brisa)</span>
+          <span>30 km/h</span>
+          <span>45+ km/h (Jato)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio & Ambience -->
+    <div class="dock-section">
+      <div class="dock-header">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Ambiência & Música Lo-Fi</span>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          Áudio & Ambiência (M)
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-sound-dock">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Música Lo-Fi Suave</span>
+          <span id="music-volume-val">65%</span>
+        </div>
+        <input type="range" id="slider-music-volume" min="0" max="100" step="5" value="65">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Ambiência do Vento</span>
+          <span id="wind-volume-val">40%</span>
+        </div>
+        <input type="range" id="slider-wind-volume" min="0" max="100" step="5" value="40">
+      </div>
+    </div>
+
+    <!-- Switches -->
+    <div class="dock-section">
+      <div class="dock-header">
+        <span>Cena & Elementos</span>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Rotação do Mapa
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-autorotate">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          Siglas 3D Flutuantes
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-labels" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
+          Picos Mais Altos
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-peaks" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Skybox 360° (Atelier)
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-skybox" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          Grade Holográfica
+        </span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-grid" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Quick State Search -->
+    <div class="dock-section">
+      <div class="dock-header">
+        <span>Buscar Estado</span>
+      </div>
+      <div class="search-select-box">
+        <select class="state-select" id="select-state">
+          <option value="">Selecione ou busque uma UF...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- API Live Reload Action -->
+    <div class="dock-section">
+      <button class="btn-api-action" id="btn-reload-api" title="Consultar novamente o endpoint oficial do IBGE">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+        <span>Sincronizar API IBGE</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Compass Needle HUD (Click to reset to North) -->
+  <div class="compass-hud" id="compass-hud" title="Bússola: Clique para apontar o Norte para cima">
+    <svg class="compass-needle" id="compass-needle" viewBox="0 0 24 24" fill="none">
+      <polygon points="12,2 16,12 12,9 8,12" fill="#ef4444" />
+      <polygon points="12,22 16,12 12,15 8,12" fill="#94a3b8" />
+      <circle cx="12" cy="12" r="1.5" fill="#ffffff" />
+    </svg>
+  </div>
+
+  <!-- Floating Hover Tooltip -->
+  <div class="hover-tooltip" id="hover-tooltip">
+    <div class="tooltip-sigla">
+      <span id="tooltip-sigla-val">SP</span>
+      <span class="tooltip-regiao" id="tooltip-regiao-val">Sudeste</span>
+    </div>
+    <div class="tooltip-nome" id="tooltip-nome-val">São Paulo</div>
+    <div class="tooltip-elevation" id="tooltip-elevation-val" style="font-size: 0.7rem; color: #38bdf8; margin-top: 2px;">Altitude: ~820m</div>
+  </div>
+
+  <!-- State Detail Drawer (Slide-in right) -->
+  <div class="detail-drawer" id="detail-drawer">
+    <div class="drawer-header">
+      <div class="drawer-badge-wrap">
+        <div class="drawer-sigla-box" id="drawer-sigla">SP</div>
+        <div class="drawer-title-group">
+          <h2 id="drawer-nome">São Paulo</h2>
+          <span class="drawer-regiao-tag" id="drawer-regiao">Região Sudeste</span>
+        </div>
+      </div>
+      <button class="btn-close-drawer" id="btn-close-drawer" title="Fechar painel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer-stats-grid">
+      <div class="stat-card">
+        <span class="label">Capital</span>
+        <span class="value" id="drawer-capital">São Paulo</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">Código IBGE</span>
+        <span class="value" id="drawer-codibge">35</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">População Est.</span>
+        <span class="value" id="drawer-populacao">44.411.238</span>
+      </div>
+      <div class="stat-card">
+        <span class="label">Área Territorial</span>
+        <span class="value" id="drawer-area">248.219 km²</span>
+      </div>
+    </div>
+
+    <div class="drawer-fact-box" id="drawer-fact">
+      <strong>Curiosidade:</strong> Maior polo econômico e industrial da América Latina.
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Hints -->
+  <div class="bottom-hints">
+    <div class="hint-item">
+      <kbd>Botão Esquerdo</kbd>
+      <span>Girar 3D</span>
+    </div>
+    <div class="hint-item">
+      <kbd>Scroll</kbd>
+      <span>Zoom</span>
+    </div>
+    <div class="hint-item">
+      <kbd>Botão Direito</kbd>
+      <span>Deslocar Pan</span>
+    </div>
+    <div class="hint-item">
+      <kbd>Luz Lateral</kbd>
+      <span>Ajuste Azimute & Elevação</span>
+    </div>
+  </div>
+
+  <!-- Loading Screen -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loader-spinner"></div>
+    <div class="loading-text" id="loading-text">Processando Relevo Topográfico & Malha IBGE...</div>
+  </div>
+
+  <!-- Library Scripts (Local first, CDN fallback) -->
+  <script src="libs/three.min.js"></script>
+  <script src="libs/OrbitControls.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+    }
+  </script>
+
+  <!-- Pre-cached IBGE GeoJSON and State Metadata -->
+  <script src="data.js"></script>
+
+  <!-- CPTEC / INPE Atmospheric Model Wind Grid -->
+  <script src="cptec_wind_data.js"></script>
+
+  <!-- Ambient Audio & Lo-Fi Music Synthesizer -->
+  <script src="audio_ambience.js"></script>
+
+  <!-- Application Logic -->
+  <script src="main.js"></script>
+
+</body>
+</html>
