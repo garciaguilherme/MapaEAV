@@ -1296,3 +1296,66 @@ input:checked + .toggle-slider:before {
   color: #140f0b;
   box-shadow: 0 0 16px var(--primary-glow);
 }
+
+/* Metadados Detalhados & Chips de Links nas Fontes */
+.source-meta-block {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(10, 8, 6, 0.55);
+  border: 1px solid rgba(212, 175, 55, 0.14);
+  border-radius: 10px;
+  padding: 11px 13px;
+}
+
+.source-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+}
+
+.source-meta-label {
+  font-weight: 700;
+  color: var(--primary-gold);
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.source-meta-val {
+  color: var(--text-muted);
+  line-height: 1.45;
+  font-size: 0.79rem;
+}
+
+.source-links-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 3px;
+}
+
+.source-link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(205, 168, 81, 0.12);
+  border: 1px solid rgba(205, 168, 81, 0.32);
+  color: var(--primary-gold);
+  padding: 4px 11px;
+  border-radius: 14px;
+  font-size: 0.73rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+.source-link-chip:hover {
+  background: var(--primary-gold);
+  color: #140f0b;
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 12px var(--primary-glow);
+  transform: translateY(-1px);
+}
