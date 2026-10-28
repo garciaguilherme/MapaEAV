@@ -108,7 +108,7 @@
   let sunOrbitActive = false;
   let autoRotate = false;
   let showLabels = false; // By default off to let the magnificent relief artwork shine cleanly
-  let showPeaks = true;
+  let showPeaks = false; // Desativado conforme solicitação do usuário
   let showGrid = false; // Turned off by default in vintage mode to show paper sheet
   let soundEnabled = false;
   let activeRegionFilter = 'todas';
@@ -707,66 +707,13 @@
     }
   }
 
-  // --- Build Notable Peaks Markers ---
+  // --- Build Notable Peaks Markers (Desativado conforme solicitação do usuário) ---
   function buildNotablePeaks() {
+    if (!peaksGroup) return;
     while (peaksGroup.children.length > 0) {
       peaksGroup.remove(peaksGroup.children[0]);
     }
-
-    NOTABLE_PEAKS.forEach(pk => {
-      const pt = projectCoord(pk.lon, pk.lat);
-      const zElev = sampleElevationAtCoord(pk.lon, pk.lat) * reliefExaggeration;
-
-      const peakObj = new THREE.Group();
-      peakObj.position.set(pt.x, pt.y, zElev);
-
-      // Antique brass summit cone
-      const coneGeo = new THREE.ConeGeometry(0.28, 0.75, 8);
-      coneGeo.rotateX(Math.PI);
-      const coneMat = new THREE.MeshStandardMaterial({
-        color: 0xcda851,
-        metalness: 0.6,
-        roughness: 0.3
-      });
-      const cone = new THREE.Mesh(coneGeo, coneMat);
-      cone.position.z = 0.38;
-      peakObj.add(cone);
-
-      // Vintage styled badge
-      const canvas = document.createElement('canvas');
-      canvas.width = 190;
-      canvas.height = 68;
-      const ctx = canvas.getContext('2d');
-
-      ctx.fillStyle = 'rgba(20, 16, 12, 0.9)';
-      ctx.beginPath();
-      ctx.roundRect(4, 4, 182, 60, 8);
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#cda851';
-      ctx.stroke();
-
-      ctx.fillStyle = '#f4ede2';
-      ctx.font = 'bold 20px "Cinzel", "Space Grotesk", serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(pk.name, 95, 30);
-
-      ctx.fillStyle = '#cda851';
-      ctx.font = 'bold 18px "Inter", sans-serif';
-      ctx.fillText(pk.alt, 95, 52);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.minFilter = THREE.LinearFilter;
-      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
-      const sprite = new THREE.Sprite(spriteMat);
-      sprite.scale.set(2.4, 0.85, 1);
-      sprite.position.z = 1.25;
-      peakObj.add(sprite);
-
-      peaksGroup.add(peakObj);
-    });
-
-    peaksGroup.visible = showPeaks;
+    peaksGroup.visible = false;
   }
 
   function sampleElevationAtCoord(lon, lat) {
@@ -1760,10 +1707,12 @@
       });
     });
 
-    togglePeaks.addEventListener('change', (e) => {
-      showPeaks = e.target.checked;
-      if (peaksGroup) peaksGroup.visible = showPeaks;
-    });
+    if (togglePeaks) {
+      togglePeaks.addEventListener('change', (e) => {
+        showPeaks = e.target.checked;
+        if (peaksGroup) peaksGroup.visible = showPeaks;
+      });
+    }
 
     toggleGrid.addEventListener('change', (e) => {
       showGrid = e.target.checked;
